@@ -86,6 +86,9 @@ jobs:
           VERSION="${{ steps.next.outputs.version }}"
           MAJOR_TAG="v${VERSION#v}" && MAJOR_TAG="v${MAJOR_TAG%%.*}"
 
+          # Fetch the new tag created by gh release
+          git fetch origin --tags
+
           # Delete existing major tag if it exists
           git tag -d "${MAJOR_TAG}" 2>/dev/null || true
           git push origin ":refs/tags/${MAJOR_TAG}" 2>/dev/null || true
