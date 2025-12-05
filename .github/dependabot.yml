@@ -5,7 +5,8 @@ updates:
     schedule:
       interval: "monthly"
     commit-message:
-      prefix: "chore"
+      prefix: "chore(deps)"
+      include: "scope"
     labels:
       - "dependencies"
 
@@ -14,6 +15,7 @@ updates:
     schedule:
       interval: "monthly"
     commit-message:
-      prefix: "chore"
+      prefix: "chore(deps)"
+      include: "scope"
     labels:
       - "dependencies"
