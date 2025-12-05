@@ -26,8 +26,12 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: '20'
         registry-url: 'https://registry.npmjs.org'
+
+    - name: Upgrade npm for OIDC support
+      shell: bash
+      run: npm install -g npm@latest
 
     - name: Configure git
       shell: bash
@@ -35,22 +39,10 @@ runs:
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-    - name: Detect package manager
-      id: detect-pm
-      shell: bash
-      run: |
-        if [ -f "yarn.lock" ]; then
-          echo "pm=yarn" >> $GITHUB_OUTPUT
-          echo "run=yarn dlx" >> $GITHUB_OUTPUT
-        else
-          echo "pm=npm" >> $GITHUB_OUTPUT
-          echo "run=npx" >> $GITHUB_OUTPUT
-        fi
-
     - name: Install dependencies
       shell: bash
       run: |
-        if [ "${{ steps.detect-pm.outputs.pm }}" == "yarn" ]; then
+        if [ -f "yarn.lock" ]; then
           yarn install --immutable
         else
           npm ci
@@ -60,7 +52,7 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.release_type }}" == "prerelease" ]; then
-          ${{ steps.detect-pm.outputs.run }} release-it --ci ${{ inputs.increment }} --preRelease=${{ inputs.dist_tag }} --github.preRelease
+          npx release-it --ci ${{ inputs.increment }} --preRelease=${{ inputs.dist_tag }} --github.preRelease
         else
-          ${{ steps.detect-pm.outputs.run }} release-it --ci ${{ inputs.increment }}
+          npx release-it --ci ${{ inputs.increment }}
         fi
