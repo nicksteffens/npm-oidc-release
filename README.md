@@ -100,7 +100,23 @@ jobs:
 ## How it works
 
 - Detects package manager (yarn or npm) from lock file
-- Uses Node 22 with npm 10+ for OIDC support
+- Uses Node LTS with the latest npm version for OIDC support
 - Configures git with the GitHub actor
 - Installs dependencies (`yarn install --immutable` or `npm ci`)
 - Runs release-it with the appropriate flags
+
+## Known Issues
+
+### Yarn 3.0.x Compatibility
+
+Yarn 3.0.x has a [known bug](https://github.com/yarnpkg/berry/pull/3610) that causes `ERR_STREAM_PREMATURE_CLOSE` errors with Node 20+. This was fixed in yarn 3.1.0.
+
+**Solution:** Upgrade yarn by running:
+
+```bash
+yarn set version 3.8.7
+```
+
+This updates both `.yarnrc.yml` and the bundled yarn binary in `.yarn/releases/`.
+
+> **Note:** `volta pin yarn@3` only affects local development - CI uses the bundled binary from `yarnPath`. You must use `yarn set version` to fix this.

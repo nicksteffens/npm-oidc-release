@@ -26,7 +26,7 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: 'lts/*'
         registry-url: 'https://registry.npmjs.org'
 
     - name: Upgrade npm for OIDC support
@@ -38,6 +38,19 @@ runs:
       run: |
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+    - name: Check yarn version compatibility
+      shell: bash
+      run: |
+        if [ -f "yarn.lock" ] && [ -f ".yarnrc.yml" ]; then
+          YARN_PATH=$(grep "yarnPath:" .yarnrc.yml | sed 's/.*yarn-\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.cjs/\1/')
+          if [[ "$YARN_PATH" =~ ^3\.0\. ]]; then
+            echo "::error::Yarn 3.0.x has a known bug causing ERR_STREAM_PREMATURE_CLOSE with Node 20+."
+            echo "::error::Please upgrade yarn by running: yarn set version 3.8.7"
+            echo "::error::See: https://github.com/nicksteffens/npm-oidc-release/issues/1"
+            exit 1
+          fi
+        fi
 
     - name: Install dependencies
       shell: bash
