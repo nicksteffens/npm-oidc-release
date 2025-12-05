@@ -100,7 +100,7 @@ jobs:
 ## How it works
 
 - Detects package manager (yarn or npm) from lock file
-- Uses Node 20 with npm 10+ for OIDC support
+- Uses Node LTS with npm 11+ for OIDC support
 - Configures git with the GitHub actor
 - Installs dependencies (`yarn install --immutable` or `npm ci`)
 - Runs release-it with the appropriate flags
