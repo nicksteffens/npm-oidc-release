@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version type'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Get current version
+        id: current
+        run: |
+          LATEST_TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName' || echo "v0.0.0")
+          echo "tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          echo "Current version: ${LATEST_TAG}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calculate next version
+        id: next
+        run: |
+          CURRENT="${{ steps.current.outputs.tag }}"
+          # Remove 'v' prefix
+          VERSION="${CURRENT#v}"
+
+          # Parse semver
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          # Increment based on input
+          case "${{ inputs.version }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "Next version: ${NEW_VERSION}"
+
+      - name: Create release
+        run: |
+          gh release create ${{ steps.next.outputs.version }} \
+            --title "${{ steps.next.outputs.version }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update major version tag
+        run: |
+          VERSION="${{ steps.next.outputs.version }}"
+          MAJOR_TAG="v${VERSION#v}" && MAJOR_TAG="v${MAJOR_TAG%%.*}"
+
+          # Delete existing major tag if it exists
+          git tag -d "${MAJOR_TAG}" 2>/dev/null || true
+          git push origin ":refs/tags/${MAJOR_TAG}" 2>/dev/null || true
+
+          # Create new major tag pointing to this release
+          git tag "${MAJOR_TAG}" "${{ steps.next.outputs.version }}"
+          git push origin "${MAJOR_TAG}"
+
+          echo "Updated ${MAJOR_TAG} to point to ${{ steps.next.outputs.version }}"
