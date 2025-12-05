@@ -43,7 +43,7 @@ runs:
       shell: bash
       run: |
         if [ -f "yarn.lock" ] && [ -f ".yarnrc.yml" ]; then
-          YARN_PATH=$(grep "yarnPath:" .yarnrc.yml | sed 's/.*yarn-\([0-9.]*\)\.cjs/\1/')
+          YARN_PATH=$(grep "yarnPath:" .yarnrc.yml | sed 's/.*yarn-\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.cjs/\1/')
           if [[ "$YARN_PATH" =~ ^3\.0\. ]]; then
             echo "::error::Yarn 3.0.x has a known bug causing ERR_STREAM_PREMATURE_CLOSE with Node 20+."
             echo "::error::Please upgrade yarn by running: yarn set version 3.8.7"
