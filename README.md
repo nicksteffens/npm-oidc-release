@@ -97,7 +97,6 @@ jobs:
 | `increment` | Version bump: `major`, `minor`, `patch`, or blank for auto | `''` |
 | `dist_tag` | NPM dist tag for prereleases | `alpha` |
 | `workspace` | NPM workspace name for monorepo releases | `''` |
-| `working_directory` | **DEPRECATED** - Use `workspace` instead | `.` |
 
 ### Monorepo / Workspace Usage
 

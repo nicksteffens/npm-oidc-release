@@ -23,11 +23,6 @@ inputs:
     description: 'NPM workspace name for monorepo releases (e.g., eslint-plugin-ui)'
     required: false
     default: ''
-  working_directory:
-    description: 'DEPRECATED: Use workspace instead. Directory to run the release from.'
-    required: false
-    default: '.'
-    deprecationMessage: 'working_directory is deprecated. Use workspace instead for monorepo support.'
 
 runs:
   using: 'composite'
