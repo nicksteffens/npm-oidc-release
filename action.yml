@@ -19,6 +19,10 @@ inputs:
     description: 'Pre-release dist tag (only used for prerelease)'
     required: false
     default: 'alpha'
+  working_directory:
+    description: 'Directory to run the release from (for monorepos/workspaces)'
+    required: false
+    default: '.'
 
 runs:
   using: 'composite'
@@ -41,6 +45,7 @@ runs:
 
     - name: Check yarn version compatibility
       shell: bash
+      working-directory: ${{ inputs.working_directory }}
       run: |
         if [ -f "yarn.lock" ] && [ -f ".yarnrc.yml" ]; then
           YARN_PATH=$(grep "yarnPath:" .yarnrc.yml | sed 's/.*yarn-\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.cjs/\1/')
@@ -54,6 +59,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
+      working-directory: ${{ inputs.working_directory }}
       run: |
         if [ -f "yarn.lock" ]; then
           yarn install --immutable
@@ -63,6 +69,7 @@ runs:
 
     - name: Run release-it
       shell: bash
+      working-directory: ${{ inputs.working_directory }}
       run: |
         if [ "${{ inputs.release_type }}" == "prerelease" ]; then
           npx release-it --ci ${{ inputs.increment }} --preRelease=${{ inputs.dist_tag }} --github.preRelease
