@@ -96,6 +96,20 @@ jobs:
 | `release_type` | `release` or `prerelease` | `release` |
 | `increment` | Version bump: `major`, `minor`, `patch`, or blank for auto | `''` |
 | `dist_tag` | NPM dist tag for prereleases | `alpha` |
+| `working_directory` | Directory to run the release from (for monorepos/workspaces) | `.` |
+
+### Monorepo / Workspace Usage
+
+For releasing a package from a subdirectory (e.g., npm workspaces):
+
+```yaml
+- uses: nicksteffens/npm-oidc-release@v1
+  with:
+    release_type: ${{ inputs.release_type }}
+    working_directory: packages/my-package
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ## How it works
 
