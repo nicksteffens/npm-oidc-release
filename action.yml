@@ -63,8 +63,10 @@ runs:
       run: |
         if [ -f "yarn.lock" ]; then
           yarn install --immutable
-        else
+        elif [ -f "package-lock.json" ]; then
           npm ci
+        else
+          npm install
         fi
 
     - name: Run release-it
