@@ -134,6 +134,25 @@ The action uses `npx --workspace=<name>` to run release-it in the workspace cont
   - For workspaces: `npx --workspace=<name> release-it ...`
   - For root packages: `npx release-it ...`
 
+## Releasing this action
+
+Releases of *this* repo are handled by `.github/workflows/release.yml`, triggered on push to `main` when `action.yml` changes, or manually via `workflow_dispatch`.
+
+1. `release-it` bumps the version (from conventional commits, or the `increment` input on manual runs), updates `CHANGELOG.md`, creates a `vX.Y.Z` tag, and publishes a GitHub release. If there are no releasable commits, it does nothing.
+2. A follow-up step moves the floating major tag (`v1`) to point at the newest `vX.Y.Z` release, so consumers pinning `@v1` automatically pick up new minor/patch versions without repinning.
+
+### If the major tag (`v1`) goes missing
+
+If `nicksteffens/npm-oidc-release@v1` fails to resolve for a consumer, the major tag is missing from origin. Recreate it manually by pointing it at the latest release tag and pushing:
+
+```bash
+git fetch --tags
+git tag -f v1 v1.3.0   # use the actual latest vX.Y.Z tag
+git push origin v1
+```
+
+This has happened before: a `workflow_dispatch` run with no new commits to release could cause the tag-update step to treat the floating `v1` tag as its own "latest release" (`git describe --tags --abbrev=0` wasn't scoped to semver tags), delete it, then fail to recreate it — leaving `v1` missing on origin entirely. Fixed by scoping the match pattern to `v[0-9]*.[0-9]*.[0-9]*`, but the underlying delete-then-recreate mechanism still has a window where the tag doesn't exist on origin if any step fails, so keep an eye on the "Update major version tag" job in future changes to this workflow.
+
 ## Known Issues
 
 ### Yarn 3.0.x Compatibility

@@ -49,8 +49,11 @@ jobs:
 
       - name: Update major version tag
         run: |
-          # Get the latest tag just created
-          LATEST_TAG=$(git describe --tags --abbrev=0)
+          # Get the latest tag just created. --match restricts this to real
+          # semver release tags so it can never resolve to the floating
+          # major tag itself (which would make the delete-then-recreate
+          # below fail and leave the major tag missing on origin).
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*')
           MAJOR_TAG="${LATEST_TAG%%.*}"
 
           # Delete existing major tag if it exists
